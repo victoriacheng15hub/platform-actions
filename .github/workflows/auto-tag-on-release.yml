@@ -1,0 +1,39 @@
+name: Auto Tag from Release Branch
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  auto-tag:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Check and create tag
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          echo "🔍 Checking last commit message..."
+          COMMIT_MSG="$(git log -1 --pretty=%B)"
+          echo "$COMMIT_MSG"
+
+          # Try to extract a release version
+          if [[ "$COMMIT_MSG" =~ release/v([0-9]+\.[0-9]+\.[0-9]+) ]]; then
+            VERSION="v${BASH_REMATCH[1]}"
+            echo "✅ Detected release version: $VERSION"
+
+            # Create and push the tag
+            git config user.name "github-actions"
+            git config user.email "actions@github.com"
+
+            git tag "$VERSION"
+            git push origin "$VERSION"
+          else
+            echo "❌ No release branch found in last commit. Skipping tag."
+          fi
