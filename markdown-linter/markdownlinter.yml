@@ -21,7 +21,7 @@ jobs:
 
       - name: Run markdownlint
         run: |
-          IFS=$'\n' read -rd '' -a paths <<< "${{ inputs.md_paths }}"
+          mapfile -t paths <<< "${{ inputs.md_paths }}"
           for path in "${paths[@]}"; do
             echo "🔍 Linting: $path"
             markdownlint "$path" --fix
