@@ -1,0 +1,28 @@
+name: Markdown Lint
+
+on:
+  workflow_call:
+    inputs:
+      md_paths:
+        description: "Newline-separated list of markdown file paths or globs"
+        required: true
+        type: string
+
+jobs:
+  markdownlint:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Install markdownlint
+        run: npm install -g markdownlint-cli
+
+      - name: Run markdownlint
+        run: |
+          IFS=$'\n' read -rd '' -a paths <<< "${{ inputs.md_paths }}"
+          for path in "${paths[@]}"; do
+            echo "🔍 Linting: $path"
+            markdownlint "$path" --fix
+          done
